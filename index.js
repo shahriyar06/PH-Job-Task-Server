@@ -43,6 +43,7 @@ async function run() {
       const Brand = req.query.Brand_Name; 
       const CategoryName = req.query.Category_Name;
       const Pricerange = req.query.Price;
+      const sortOption = req.query.sorting;
       const page = parseInt(req.query.page) || 1; 
       const limit = parseInt(req.query.limit) || 10;
       let query = {};
@@ -59,11 +60,24 @@ async function run() {
         const [minPrice, maxPrice] = Pricerange.split('-').map(Number);
         query.Price = { $gte: minPrice, $lte:maxPrice};
       }
+      let sortQuery = {};
+
+      if (sortOption) {
+        if (sortOption === "Low to High") {
+          sortQuery.Price = 1; 
+        } else if (sortOption === "High to Low") {
+          sortQuery.Price = -1; 
+        } else if (sortOption === "Newest first") {
+          sortQuery.Product_Creation_date = -1; 
+        }
+      }
+
       const skip = (page - 1) * limit;
 
       
       const cursor = allproductcollection
         .find(query)
+        .sort(sortQuery)
         .skip(skip)
         .limit(limit);
 
