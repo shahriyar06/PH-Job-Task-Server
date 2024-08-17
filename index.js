@@ -48,7 +48,9 @@ async function run() {
         query = { Brand_Name: Brand }; 
       }
       if (CategoryName) {
-        query.Category_Name = CategoryName; 
+
+        query.Category_Name = CategoryName;
+         
       }
         const cursor = allproductcollection.find(query);
         const result = await cursor.toArray();
