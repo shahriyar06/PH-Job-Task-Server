@@ -43,6 +43,8 @@ async function run() {
       const Brand = req.query.Brand_Name; 
       const CategoryName = req.query.Category_Name;
       const Pricerange = req.query.Price;
+      const page = parseInt(req.query.page) || 1; 
+      const limit = parseInt(req.query.limit) || 10;
       let query = {};
     
       if (Brand) {
@@ -57,9 +59,24 @@ async function run() {
         const [minPrice, maxPrice] = Pricerange.split('-').map(Number);
         query.Price = { $gte: minPrice, $lte:maxPrice};
       }
-        const cursor = allproductcollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
+      const skip = (page - 1) * limit;
+
+      
+      const cursor = allproductcollection
+        .find(query)
+        .skip(skip)
+        .limit(limit);
+
+      const result = await cursor.toArray();
+      const totalItems = await allproductcollection.countDocuments(query); 
+      const totalPages = Math.ceil(totalItems / limit); 
+
+      res.send({
+        products: result,
+        totalItems,
+        totalPages,
+        currentPage:page,
+});
     })
 
     // Send a ping to confirm a successful connection
